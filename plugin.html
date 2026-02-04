@@ -14,7 +14,6 @@
         }
         body { background: var(--bg-dark); color: var(--text-light); font-family: 'Segoe UI', sans-serif; padding: 0; margin: 0; font-size: 11px; user-select: none; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Header & Scale Box */
         .top-nav { display: flex; gap: 5px; padding: 5px; background: #333; border-bottom: 1px solid var(--border-dark); align-items: center; }
         .btn-main { background: var(--accent); color: white; border: none; padding: 8px; flex: 1; cursor: pointer; font-weight: bold; border-radius: 2px; }
         .btn-main:hover { background: #005a9e; }
@@ -25,7 +24,6 @@
 
         textarea { width: 100%; height: 85px; background: var(--bg-darker); color: #fff; border: none; border-bottom: 1px solid var(--border-dark); padding: 10px; box-sizing: border-box; resize: none; font-family: 'Consolas', monospace; outline: none; font-size: 12px; }
         
-        /* List Area (GELAP) */
         .list-box { flex: 1; overflow-y: auto; background: #222; color: #eee; }
         .row { display: flex; align-items: center; border-bottom: 1px solid #333; padding: 8px 12px; cursor: pointer; }
         .row:hover { background: var(--row-hover); }
@@ -36,6 +34,7 @@
 
         .footer { background: #1a1a1a; padding: 8px 10px; font-size: 10px; color: #666; border-top: 1px solid var(--border-dark); text-align: center; }
         .footer a { color: var(--accent); text-decoration: none; }
+        .version { font-size: 9px; color: #444; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -55,6 +54,7 @@
 
     <div class="footer">
         typer for photopea ( inspired by <a href="https://typer.hayasaku.fr" target="_blank">typer.hayasaku.fr</a> )
+        <div class="version">v1.2 | Stable Build</div>
     </div>
 
     <script>
@@ -102,10 +102,8 @@
 
             const ppeaScript = `
                 var doc = app.activeDocument;
-                
-                // Cek Seleksi
-                var selBounds;
-                try { selBounds = doc.selection.bounds; } catch(e) { selBounds = null; }
+                var selection;
+                try { selection = doc.selection.bounds; } catch(e) { selection = null; }
 
                 var layer = doc.artLayers.add();
                 layer.kind = LayerKind.TEXT;
@@ -115,17 +113,20 @@
                 ti.size = ${fontSize};
                 ti.justification = Justification.CENTER;
 
-                if (selBounds) {
-                    // Gunakan teknik Point Text yang dipindahkan ke tengah seleksi
-                    // Ini jauh lebih aman daripada Paragraph Text di Photopea
-                    var centerX = (selBounds[0] + selBounds[2]) / 2;
-                    var centerY = (selBounds[1] + selBounds[3]) / 2;
+                if (selection) {
+                    // Konversi ke Paragraph Text agar Warp Text aktif mengikuti seleksi
+                    ti.kind = TextType.PARAGRAPHTEXT;
+                    var w = selection[2] - selection[0];
+                    var h = selection[3] - selection[1];
                     
-                    ti.position = [centerX, centerY];
+                    // Set dimensi kotak teks sesuai area seleksi
+                    ti.width = w;
+                    ti.height = h;
                     
-                    // Aktifkan wrap jika teks terlalu panjang (opsional)
-                    // ti.width = selBounds[2] - selBounds[0]; 
+                    // Pindahkan posisi ke titik awal seleksi
+                    ti.position = [selection[0], selection[1]];
                 } else {
+                    ti.kind = TextType.POINTTEXT;
                     ti.position = [doc.width / 2, doc.height / 2];
                 }
             `;
