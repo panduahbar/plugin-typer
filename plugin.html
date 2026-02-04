@@ -4,37 +4,45 @@
     <meta charset="utf-8">
     <style>
         :root { --bg: #282828; --accent: #0078d4; --text: #eee; --border: #444; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 0; margin: 0; font-size: 11px; user-select: none; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 0; margin: 0; font-size: 11px; user-select: none; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Top Navigation */
+        /* Navigation */
         .top-nav { display: flex; gap: 2px; padding: 5px; background: #333; border-bottom: 1px solid var(--border); }
         .btn-main { background: var(--accent); color: white; border: none; padding: 8px; flex: 1; cursor: pointer; font-weight: bold; border-radius: 2px; }
         .btn-main:hover { background: #005a9e; }
         .btn-sec { background: #444; border: none; color: #ccc; padding: 8px; cursor: pointer; border-radius: 2px; }
 
-        /* Input Area */
+        /* Input */
         textarea { width: 100%; height: 80px; background: #1a1a1a; color: #fff; border: none; border-bottom: 1px solid var(--border); padding: 8px; box-sizing: border-box; resize: none; font-family: 'Courier New', monospace; outline: none; }
         
-        /* Script List */
-        .list-box { height: calc(100vh - 120px); overflow-y: auto; background: #222; }
+        /* List */
+        .list-box { flex: 1; overflow-y: auto; background: #222; }
         .row { display: flex; align-items: center; border-bottom: 1px solid #333; padding: 8px 10px; cursor: pointer; transition: 0.1s; }
         .row:hover { background: #333; }
         .row.active { background: #094771; border-left: 3px solid var(--accent); }
         .num { color: #666; width: 30px; font-size: 10px; }
         .content { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .tag { color: #ffca28; margin-right: 6px; font-weight: bold; }
+
+        /* Footer Credit */
+        .footer { background: #1a1a1a; padding: 6px 10px; font-size: 9px; color: #777; border-top: 1px solid var(--border); text-align: center; }
+        .footer a { color: #555; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="top-nav">
         <button class="btn-main" onclick="sendText()">+ Paste</button>
-        <button class="btn-sec" title="Align Center">Align</button>
-        <button class="btn-sec" title="Settings">⚙</button>
+        <button class="btn-sec">Align</button>
+        <button class="btn-sec">⚙</button>
     </div>
 
     <textarea id="input" oninput="renderLines()" placeholder="Paste script manhwa di sini..."></textarea>
 
     <div class="list-box" id="list"></div>
+
+    <div class="footer">
+        typer for photopea ( inspired by <a href="https://typer.hayasaku.fr" target="_blank">typer.hayasaku.fr</a> )
+    </div>
 
     <script>
         let selectedText = "";
@@ -65,10 +73,7 @@
         }
 
         function sendText() {
-            if(!selectedText) {
-                alert("Silakan pilih baris teks terlebih dahulu!");
-                return;
-            }
+            if(!selectedText) return;
 
             const ppeaScript = `
                 var doc = app.activeDocument;
