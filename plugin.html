@@ -4,84 +4,132 @@
     <meta charset="utf-8">
     <style>
         :root { 
-            --bg-dark: #282828;
-            --bg-darker: #1a1a1a;
-            --accent: #0078d4;
-            --text-light: #eee;
-            --border-dark: #444;
-            --row-hover: #333;
-            --row-active: #094771;
-            /* Footer Terang */
-            --footer-bg: #ffffff;
-            --footer-text: #333;
+            --bg-dark: #282828; --bg-darker: #1a1a1a; --accent: #0078d4;
+            --text-light: #eee; --border-dark: #444; --row-hover: #333;
+            --row-active: #094771; --footer-bg: #ffffff; --footer-text: #333;
         }
         body { background: var(--bg-dark); color: var(--text-light); font-family: 'Segoe UI', sans-serif; padding: 0; margin: 0; font-size: 11px; user-select: none; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Header */
-        .top-nav { display: flex; gap: 5px; padding: 5px; background: #333; border-bottom: 1px solid var(--border-dark); align-items: center; }
+        /* Header & Controls */
+        .top-nav { display: flex; gap: 4px; padding: 5px; background: #333; border-bottom: 1px solid var(--border-dark); align-items: center; }
         .btn-main { background: var(--accent); color: white; border: none; padding: 8px; flex: 1; cursor: pointer; font-weight: bold; border-radius: 2px; }
-        .btn-main:hover { background: #005a9e; }
         
-        .scale-box { display: flex; align-items: center; gap: 5px; background: #444; padding: 4px 8px; border-radius: 2px; border: 1px solid #555; min-width: 110px; }
-        .scale-box label { font-size: 11px; color: #ccc; }
-        .scale-box input { background: transparent; border: none; color: white; width: 60px; text-align: center; font-weight: bold; outline: none; font-size: 13px; }
+        .scale-section { display: flex; align-items: center; background: #444; border-radius: 2px; border: 1px solid #555; }
+        .scale-label { font-size: 10px; color: #ccc; padding: 0 5px; }
+        .scale-input { background: transparent; border: none; color: white; width: 40px; text-align: center; font-weight: bold; outline: none; padding: 4px 0; }
+        
+        .size-btn { background: #555; border: none; color: white; padding: 4px 8px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; border-left: 1px solid #666; }
+        .size-btn:hover { background: #666; }
 
-        textarea { width: 100%; height: 85px; background: var(--bg-darker); color: #fff; border: none; border-bottom: 1px solid var(--border-dark); padding: 10px; box-sizing: border-box; resize: none; font-family: 'Consolas', monospace; outline: none; font-size: 12px; }
-        
-        /* List Area */
+        textarea { width: 100%; height: 80px; background: var(--bg-darker); color: #fff; border: none; border-bottom: 1px solid var(--border-dark); padding: 8px; box-sizing: border-box; resize: none; font-family: 'Consolas', monospace; outline: none; }
         .list-box { flex: 1; overflow-y: auto; background: #222; }
-        .row { display: flex; align-items: center; border-bottom: 1px solid #333; padding: 8px 12px; cursor: pointer; }
-        .row:hover { background: var(--row-hover); }
-        .row.active { background: var(--row-active); border-left: 4px solid var(--accent); }
-        .num { color: #666; width: 30px; font-size: 10px; }
-        .content { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+        .row { display: flex; align-items: center; border-bottom: 1px solid #333; padding: 6px 10px; cursor: pointer; }
+        .row.active { background: var(--row-active); border-left: 3px solid var(--accent); }
         .tag { color: #ffca28; margin-right: 6px; font-weight: bold; }
 
+        /* Settings Modal */
+        #settingsModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; padding: 15px; box-sizing: border-box; }
+        .modal-content { background: #333; padding: 15px; border-radius: 4px; border: 1px solid #555; max-height: 95%; overflow-y: auto; }
+        .setting-item { margin-bottom: 12px; }
+        .setting-item label { display: block; color: #aaa; margin-bottom: 3px; font-size: 10px; font-weight: bold; }
+        .modal-input { background: #1a1a1a; color: #fff; border: 1px solid #555; padding: 8px; width: 100%; box-sizing: border-box; border-radius: 2px; font-size: 12px; }
+
         /* Footer */
-        .footer { background: var(--footer-bg); padding: 8px 10px; font-size: 10px; color: var(--footer-text); border-top: 1px solid #ccc; text-align: center; font-weight: 600; }
-        .footer a { color: var(--accent); text-decoration: none; }
-        .version { font-size: 9px; color: #999; margin-top: 2px; }
+        .footer { background: var(--footer-bg); padding: 6px; font-size: 10px; color: var(--footer-text); border-top: 1px solid #ccc; text-align: center; font-weight: 600; }
     </style>
 </head>
 <body>
     <div class="top-nav">
         <button class="btn-main" onclick="sendText()">+ Paste & Next</button>
-        <div class="scale-box">
-            <label>scale:</label>
-            <input type="number" id="scaleInput" value="100" min="1" max="1000">
-            <span>%</span>
+        
+        <div class="scale-section">
+            <span class="scale-label">scale:</span>
+            <input type="number" id="scaleInput" class="scale-input" value="100">
+            <span style="color:#ccc; padding-right:5px;">%</span>
+            <button class="size-btn" onclick="adjustScale(0.8)">×</button>
+            <button class="size-btn" onclick="adjustScale(1.2)">+</button>
         </div>
-        <button style="background:#444; border:none; color:white; padding:8px; cursor:pointer;">⚙</button>
+
+        <button onclick="toggleSettings()" style="background:#444; border:none; color:white; padding:8px 12px; cursor:pointer; border-radius:2px;">⚙</button>
     </div>
 
     <textarea id="input" oninput="renderLines()" placeholder="Paste script manhwa di sini..."></textarea>
-
     <div class="list-box" id="list"></div>
 
+    <div id="settingsModal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
+                <strong style="color:var(--accent); font-size:14px;">Settings</strong>
+                <button onclick="toggleSettings()" style="background:#f44; border:none; color:white; padding:4px 10px; cursor:pointer; border-radius:2px;">✕ Close</button>
+            </div>
+            
+            <div class="setting-item">
+                <label>Shortcut: Paste</label>
+                <input type="text" class="modal-input" value="WIN + CTRL" readonly>
+            </div>
+            <div class="setting-item">
+                <label>Shortcut: Next line</label>
+                <input type="text" class="modal-input" value="CTRL + ENTER" readonly>
+            </div>
+            <div class="setting-item">
+                <label>Tags for ignoring the lines</label>
+                <textarea id="ignoreTags" class="modal-input" style="height:150px;" oninput="saveSettings()"></textarea>
+            </div>
+        </div>
+    </div>
+
     <div class="footer">
-        typer for photopea ( inspired by <a href="https://typer.hayasaku.fr" target="_blank">typer.hayasaku.fr</a> )
-        <div class="version">v1.5 | Auto-Shaping Build</div>
+        typer for photopea ( inspired by <a href="https://typer.hayasaku.fr" target="_blank" style="color:var(--accent); text-decoration:none;">typer.hayasaku.fr</a> )
+        <div style="font-size:9px; color:#999; margin-top:1px;">v1.8 | Default Ignore Tags Build</div>
     </div>
 
     <script>
         let selectedIndex = -1;
         let linesData = [];
+        const DEFAULT_TAGS = "SFX:\nSfx:\nsfx:\nSFX\nSfx\nsfx\n##\nHalaman\n________________________________________\nPage\n---\npage\n— Page\n===\nP1\nP2\nP3\nP4\nP5\nP6\nP7\nP8\nP9\nP10\n[1]\n[2]\n[3]\n[4]\n[5]\n[6]\n[7]\n[8]\n[9]\n[10]\nPg.\nPAGE\n=0\n--";
+
+        function toggleSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function adjustScale(factor) {
+            const input = document.getElementById('scaleInput');
+            let current = parseFloat(input.value) || 100;
+            input.value = Math.round(current * factor);
+        }
+
+        function saveSettings() {
+            localStorage.setItem('ignoreTags', document.getElementById('ignoreTags').value);
+            renderLines();
+        }
 
         function renderLines() {
             const val = document.getElementById('input').value;
-            linesData = val.split('\n').filter(l => l.trim() !== "");
+            const ignoreVal = document.getElementById('ignoreTags').value;
+            const ignoreList = ignoreVal.split('\n').map(t => t.trim()).filter(t => t !== "");
+            
+            const rawLines = val.split('\n');
             const list = document.getElementById('list');
             list.innerHTML = '';
+            linesData = [];
 
-            linesData.forEach((line, i) => {
+            rawLines.forEach((line) => {
+                if(!line.trim()) return;
+                const shouldIgnore = ignoreList.some(tag => line.trim().startsWith(tag));
+                if(shouldIgnore) return;
+
+                linesData.push(line);
                 let div = document.createElement('div');
                 div.className = 'row';
-                div.id = 'row-' + i;
+                div.id = 'row-' + (linesData.length - 1);
+                
                 let match = line.match(/^([A-Z()]+):(.*)/);
                 let tag = match ? match[1] + ":" : "";
                 let txt = match ? match[2] : line;
-                div.innerHTML = `<span class="num">${i + 1}</span><span class="content"><span class="tag">${tag}</span>${txt}</span>`;
-                div.onclick = () => selectRow(i);
+
+                div.innerHTML = `<span style="color:#666; width:30px; font-size:10px;">${linesData.length}</span><span style="flex:1;"><span class="tag">${tag}</span>${txt}</span>`;
+                div.onclick = () => selectRow(linesData.length - 1);
                 list.appendChild(div);
             });
         }
@@ -96,59 +144,49 @@
             }
         }
 
-        // Fungsi Auto-Shaping: Menambahkan enter setiap 3-4 kata
-        function autoShape(text) {
-            let words = text.split(' ');
-            let shapedText = "";
-            for (let i = 0; i < words.length; i++) {
-                shapedText += words[i] + " ";
-                if ((i + 1) % 3 === 0 && i !== words.length - 1) {
-                    shapedText += "\\r";
-                }
-            }
-            return shapedText.trim();
-        }
-
         function sendText() {
             if(selectedIndex === -1 || !linesData[selectedIndex]) return;
-
             const scaleVal = parseFloat(document.getElementById('scaleInput').value) || 100;
             const fontSize = 25 * (scaleVal / 100);
-            
             let line = linesData[selectedIndex];
             let match = line.match(/^([A-Z()]+):(.*)/);
             let rawText = match ? match[2].trim() : line.trim();
-            
-            // Terapkan Auto-Shaping
-            let cleanText = autoShape(rawText);
+
+            let words = rawText.split(' ');
+            let shapedText = "";
+            for (let i = 0; i < words.length; i++) {
+                shapedText += words[i] + " ";
+                if ((i + 1) % 3 === 0 && i !== words.length - 1) shapedText += "\\r";
+            }
 
             const ppeaScript = `
                 var doc = app.activeDocument;
-                var selection;
-                try { selection = doc.selection.bounds; } catch(e) { selection = null; }
-
+                var sel; try { sel = doc.selection.bounds; } catch(e) { sel = null; }
                 var layer = doc.artLayers.add();
                 layer.kind = LayerKind.TEXT;
                 var ti = layer.textItem;
-                
-                ti.kind = TextType.POINTTEXT;
-                ti.contents = "${cleanText.replace(/"/g, '\\"')}";
+                ti.contents = "${shapedText.trim().replace(/"/g, '\\"')}";
                 ti.size = ${fontSize};
                 ti.justification = Justification.CENTER;
-
-                if (selection) {
-                    var centerX = (selection[0] + selection[2]) / 2;
-                    var centerY = (selection[1] + selection[3]) / 2;
-                    ti.position = [centerX, centerY];
+                if (sel) {
+                    ti.position = [(sel[0] + sel[2]) / 2, (sel[1] + sel[3]) / 2];
                 } else {
                     ti.position = [doc.width / 2, doc.height / 2];
                 }
             `;
             window.parent.postMessage(ppeaScript, "*");
+            if (selectedIndex < linesData.length - 1) selectRow(selectedIndex + 1);
+        }
 
-            if (selectedIndex < linesData.length - 1) {
-                selectRow(selectedIndex + 1);
+        window.onload = () => {
+            let saved = localStorage.getItem('ignoreTags');
+            if (saved === null) {
+                document.getElementById('ignoreTags').value = DEFAULT_TAGS;
+                localStorage.setItem('ignoreTags', DEFAULT_TAGS);
+            } else {
+                document.getElementById('ignoreTags').value = saved;
             }
+            renderLines();
         }
     </script>
 </body>
