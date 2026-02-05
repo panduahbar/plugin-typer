@@ -68,13 +68,11 @@
             </div>
             <input type="hidden" id="editStyleId">
             <label>Style Name</label>
-            <input type="text" id="sName" class="modal-input" placeholder="e.g. Normal Speech">
-            
-            <label>Font Family (Ketik Nama Font Sesuai di Photopea)</label>
-            <input type="text" id="sFont" class="modal-input" placeholder="e.g. CCVictorySpeech-Regular">
-
+            <input type="text" id="sName" class="modal-input">
+            <label>Font Name (Copy Nama Font dari Photopea)</label>
+            <input type="text" id="sFont" class="modal-input" placeholder="e.g. Arial atau CCVictorySpeech-Regular">
             <label>Base Size (px)</label>
-            <input type="number" id="sSize" class="modal-input" value="50">
+            <input type="number" id="sSize" class="modal-input">
             <label>Prefixes (Pisahkan dengan koma)</label>
             <input type="text" id="sPrefix" class="modal-input" placeholder='"": , ():'>
             <button style="background:var(--accent); color:white; border:none; padding:10px; width:100%; cursor:pointer; font-weight:bold;" onclick="saveStyle()">Save Style</button>
@@ -88,29 +86,26 @@
                 <strong>Settings</strong>
                 <button onclick="toggleModal('settingsModal')" style="color:#f44; border:none; background:none; cursor:pointer; font-weight:bold;">✕</button>
             </div>
-            
             <label style="font-size:10px; color:#aaa; font-weight:bold;">Shortcut Info</label>
             <div style="background:#222; padding:8px; margin:5px 0 15px; border:1px solid #444; display:flex; justify-content:space-between; align-items:center;">
                 <span>WIN + CTRL <small style="color:#ffca28; margin-left:5px;">(click line first)</small></span>
                 <span style="color:#f44;">✕</span>
             </div>
-
             <label style="font-size:10px; color:#aaa; font-weight:bold;">Import/Export JSON</label>
             <div style="display:flex; gap:5px; margin-bottom:15px; margin-top:5px;">
                 <button onclick="exportJSON()" style="flex:1; padding:8px; background:#444; color:white; border:none; cursor:pointer;">Export</button>
                 <button onclick="document.getElementById('importFile').click()" style="flex:1; padding:8px; background:#444; color:white; border:none; cursor:pointer;">Import</button>
             </div>
             <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
-
             <label style="font-size:10px; color:#aaa; font-weight:bold;">Tags for ignoring the lines</label>
             <textarea id="ignoreTags" class="modal-input" style="height:100px;" oninput="saveSettings()"></textarea>
-            <button onclick="localStorage.clear(); location.reload();" style="background:#f44; color:white; border:none; padding:5px; width:100%; cursor:pointer; font-size:9px; margin-top:10px;">RESET ALL DATA</button>
+            <button onclick="if(confirm('Reset semua data?')){localStorage.clear(); location.reload();}" style="background:#f44; color:white; border:none; padding:5px; width:100%; cursor:pointer; font-size:9px; margin-top:10px;">RESET ALL DATA</button>
         </div>
     </div>
 
     <div class="footer">
         typer for photopea ( inspired by <a href="https://typer.hayasaku.fr" target="_blank">typer.hayasaku.fr</a> )
-        <div style="font-size:9px; color:#888; margin-top:2px;">v3.3 | Empty Style Default | Manual Font Input</div>
+        <div style="font-size:9px; color:#888; margin-top:2px;">v3.4 | Multi-Font Logic Fix | Light Footer</div>
     </div>
 
     <script>
@@ -149,10 +144,7 @@
                 const item = document.createElement('div');
                 item.className = `style-item ${activeStyleId == s.id ? 'active' : ''}`;
                 item.onclick = () => { activeStyleId = s.id; renderStyleGrid(); saveData(); };
-                item.innerHTML = `
-                    <div class="style-name">${s.name}</div>
-                    <span class="edit-icon" onclick="event.stopPropagation(); openEditStyle('${s.id}')">✎</span>
-                `;
+                item.innerHTML = `<div class="style-name">${s.name}</div><span class="edit-icon" onclick="event.stopPropagation(); openEditStyle('${s.id}')">✎</span>`;
                 grid.appendChild(item);
             });
         }
@@ -258,7 +250,7 @@
                 layer.kind = LayerKind.TEXT;
                 var ti = layer.textItem;
                 ti.contents = "${s.trim().replace(/"/g, '\\"')}";
-                ti.font = "${style.font}";
+                try { ti.font = "${style.font}"; } catch(e) {}
                 ti.size = ${style.size * scale};
                 ti.justification = Justification.CENTER;
                 if (sel) { ti.position = [(sel[0] + sel[2]) / 2, (sel[1] + sel[3]) / 2]; }
@@ -272,7 +264,7 @@
             const data = { styles, ignoreLinePrefixes: document.getElementById('ignoreTags').value.split('\n') };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob); a.download = 'typer_style_custom.json'; a.click();
+            a.href = URL.createObjectURL(blob); a.download = 'typer_style.json'; a.click();
         }
 
         function importJSON(e) {
