@@ -35,9 +35,6 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; padding: 20px; box-sizing: border-box; }
         .modal-content { background: #333; padding: 15px; border-radius: 4px; border: 1px solid #555; max-height: 95%; overflow-y: auto; color: #fff; }
         .modal-input, .modal-select { background: #1a1a1a; color: #fff; border: 1px solid #555; padding: 8px; width: 100%; box-sizing: border-box; margin-top: 5px; border-radius: 2px; margin-bottom: 10px; font-size: 12px; }
-        
-        .btn-copy-layer { background: #555; color: #eee; border: 1px solid #666; padding: 10px; width: 100%; cursor: pointer; border-radius: 2px; margin-bottom: 15px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-copy-layer:active { background: var(--accent); }
 
         .footer { background: var(--footer-bg); padding: 8px; font-size: 10px; color: var(--footer-text); border-top: 1px solid #ccc; text-align: center; font-weight: 500; }
     </style>
@@ -68,29 +65,34 @@
                 <button onclick="toggleModal('styleModal')" style="color:#f44; border:none; background:none; cursor:pointer; font-weight:bold;">✕</button>
             </div>
             
-            <button class="btn-copy-layer" onclick="askPhotopeaForStyle()">
-                <span>📄</span> Copy layer style
-            </button>
-
             <input type="hidden" id="editStyleId">
             <label>Style Name</label>
             <input type="text" id="sName" class="modal-input">
             
-            <label>Font PostScript Name</label>
-            <input type="text" id="sFont" class="modal-input" placeholder="e.g. CCVictorySpeech-Regular">
+            <label>Font Family</label>
+            <select id="sFont" class="modal-select">
+                <option value="Arial">Arial (Default)</option>
+                <option value="CCVictorySpeech-Regular">CC Victory Speech</option>
+                <option value="CCVictorySpeech-Italic">CC Victory Speech Italic</option>
+                <option value="2Dumb">2Dumb</option>
+                <option value="WildWords-Regular">Wild Words</option>
+                <option value="AnimeAce2.0BB-Regular">Anime Ace 2.0</option>
+                <option value="KomikaAxis">Komika Axis</option>
+            </select>
+            <div style="font-size:9px; color:#aaa; margin-top:-10px; margin-bottom:10px;">*Pilih font yang sudah kamu load di Photopea</div>
             
-            <label>Appearance Style</label>
+            <label>Appearance</label>
             <select id="sWeight" class="modal-select">
                 <option value="Regular">Regular</option>
-                <option value="Bold">Forced Bold</option>
-                <option value="Italic">Forced Italic</option>
-                <option value="Bold Italic">Forced Bold Italic</option>
+                <option value="Bold">Bold</option>
+                <option value="Italic">Italic</option>
+                <option value="Bold Italic">Bold Italic</option>
             </select>
 
             <label>Base Size (px)</label>
             <input type="number" id="sSize" class="modal-input">
-            <label>Prefixes (comma separated)</label>
-            <input type="text" id="sPrefix" class="modal-input" placeholder='"": , ():'>
+            <label>Prefixes (Pisahkan dengan koma)</label>
+            <input type="text" id="sPrefix" class="modal-input">
             
             <button style="background:var(--accent); color:white; border:none; padding:10px; width:100%; cursor:pointer; font-weight:bold;" onclick="saveStyle()">Save Style</button>
             <button style="background:#f44; color:white; border:none; padding:10px; width:100%; cursor:pointer; font-weight:bold; margin-top:5px;" id="btnDelStyle" onclick="deleteStyle()">Delete Style</button>
@@ -119,38 +121,12 @@
     </div>
 
     <div class="footer">
-        typer for photopea | v4.0 | Final Communication Fix | Light Footer
+        typer for photopea | v4.1 | Dropdown Font System | Light Footer
     </div>
 
     <script>
         let selectedIndex = -1, activeStyleId = null, filteredLines = [], styles = [];
         const DEFAULT_TAGS = "SFX:\nSfx:\nsfx:\nSFX\nSfx\nsfx\n##\nHalaman\nPage\n---\npage\n===\nP1\nP2\n[1]\nPg.\nPAGE\n=0\n--";
-
-        // Listen for Photopea response (New Method)
-        window.addEventListener("message", function(e) {
-            if (e.data && typeof e.data === "string" && e.data.startsWith("LAYER_DATA:")) {
-                const rawData = e.data.replace("LAYER_DATA:", "");
-                const json = JSON.parse(rawData);
-                document.getElementById('sFont').value = json.font;
-                document.getElementById('sSize').value = Math.round(json.size);
-            }
-        });
-
-        function askPhotopeaForStyle() {
-            // Skrip Photopea yang mengirim data keSharedWindow (Plugin)
-            const script = `
-                var doc = app.activeDocument;
-                var ly = doc.activeLayer;
-                if(ly && ly.kind == LayerKind.TEXT) {
-                    var ti = ly.textItem;
-                    var data = { font: ti.font, size: ti.size };
-                    app.echoToSharedWindow("LAYER_DATA:" + JSON.stringify(data));
-                } else {
-                    alert("Klik layer TEKS di Photopea dulu!");
-                }
-            `;
-            window.parent.postMessage(script, "*");
-        }
 
         function handleGlobalKeys(e) {
             if (e.ctrlKey && (e.metaKey || e.key === "Meta" || e.code.includes("Meta"))) {
@@ -190,7 +166,6 @@
             document.getElementById('styleModalTitle').innerText = "Add New Style";
             document.getElementById('editStyleId').value = "";
             document.getElementById('sName').value = "";
-            document.getElementById('sFont').value = "";
             document.getElementById('sSize').value = 50;
             document.getElementById('sPrefix').value = "";
             document.getElementById('btnDelStyle').style.display = "none";
@@ -216,7 +191,7 @@
             const newStyle = {
                 id: id || Date.now().toString(),
                 name: document.getElementById('sName').value || "Unnamed",
-                font: document.getElementById('sFont').value || "Arial",
+                font: document.getElementById('sFont').value,
                 weight: document.getElementById('sWeight').value,
                 size: parseInt(document.getElementById('sSize').value) || 50,
                 prefixes: document.getElementById('sPrefix').value.split(",").map(x => x.trim()).filter(x => x !== "")
