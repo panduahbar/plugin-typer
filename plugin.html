@@ -35,8 +35,9 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; padding: 20px; box-sizing: border-box; }
         .modal-content { background: #333; padding: 15px; border-radius: 4px; border: 1px solid #555; max-height: 95%; overflow-y: auto; color: #fff; }
         .modal-input, .modal-select { background: #1a1a1a; color: #fff; border: 1px solid #555; padding: 8px; width: 100%; box-sizing: border-box; margin-top: 5px; border-radius: 2px; margin-bottom: 10px; font-size: 12px; }
-        .btn-copy-layer { background: #555; color: #eee; border: 1px solid #666; padding: 8px; width: 100%; cursor: pointer; border-radius: 2px; margin-bottom: 15px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-copy-layer:hover { background: #666; }
+        
+        .btn-copy-layer { background: #555; color: #eee; border: 1px solid #666; padding: 10px; width: 100%; cursor: pointer; border-radius: 2px; margin-bottom: 15px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-copy-layer:active { background: var(--accent); }
 
         .footer { background: var(--footer-bg); padding: 8px; font-size: 10px; color: var(--footer-text); border-top: 1px solid #ccc; text-align: center; font-weight: 500; }
     </style>
@@ -70,7 +71,6 @@
             <button class="btn-copy-layer" onclick="askPhotopeaForStyle()">
                 <span>📄</span> Copy layer style
             </button>
-            <div style="font-size:9px; color:#aaa; margin-top:-10px; margin-bottom:15px; font-style:italic;">Copy font & size from the active text layer in Photopea</div>
 
             <input type="hidden" id="editStyleId">
             <label>Style Name</label>
@@ -89,11 +89,10 @@
 
             <label>Base Size (px)</label>
             <input type="number" id="sSize" class="modal-input">
-            <label>Prefixes (comma separated)</label>
-            <input type="text" id="sPrefix" class="modal-input">
+            <label>Prefixes (Pisahkan dengan koma)</label>
+            <input type="text" id="sPrefix" class="modal-input" placeholder='"": , ():'>
             
             <button style="background:var(--accent); color:white; border:none; padding:10px; width:100%; cursor:pointer; font-weight:bold;" onclick="saveStyle()">Save Style</button>
-            <button style="background:#f44; color:white; border:none; padding:10px; width:100%; cursor:pointer; font-weight:bold; margin-top:5px;" id="btnDelStyle" onclick="deleteStyle()">Delete Style</button>
         </div>
     </div>
 
@@ -114,37 +113,34 @@
             <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
             <label style="font-size:10px; color:#aaa; font-weight:bold;">Tags to Ignore</label>
             <textarea id="ignoreTags" class="modal-input" style="height:100px;" oninput="saveSettings()"></textarea>
-            <button onclick="if(confirm('Reset all data?')){localStorage.clear(); location.reload();}" style="background:#f44; color:white; border:none; padding:5px; width:100%; cursor:pointer; font-size:9px; margin-top:10px;">RESET ALL DATA</button>
         </div>
     </div>
 
     <div class="footer">
-        typer for photopea | v3.8 | Copy Layer Style System | Light Footer
+        typer for photopea ( v3.9 ) | Light Footer
     </div>
 
     <script>
-        let selectedIndex = -1;
-        let activeStyleId = null;
-        let filteredLines = [];
-        let styles = [];
+        let selectedIndex = -1, activeStyleId = null, filteredLines = [], styles = [];
         const DEFAULT_TAGS = "SFX:\nSfx:\nsfx:\nSFX\nSfx\nsfx\n##\nHalaman\nPage\n---\npage\n===\nP1\nP2\n[1]\nPg.\nPAGE\n=0\n--";
 
-        window.addEventListener("message", function(e) {
+        // Listen for Photopea response
+        window.onmessage = function(e) {
             if (e.data && typeof e.data === "string" && e.data.startsWith("LAYER_STYLE|")) {
                 const parts = e.data.split("|");
                 document.getElementById('sFont').value = parts[1];
                 document.getElementById('sSize').value = Math.round(parseFloat(parts[2]));
             }
-        });
+        };
 
         function askPhotopeaForStyle() {
             const script = `
                 var ly = app.activeDocument.activeLayer;
-                if(ly.kind == LayerKind.TEXT) {
+                if(ly && ly.kind == LayerKind.TEXT) {
                     var ti = ly.textItem;
                     window.parent.postMessage("LAYER_STYLE|" + ti.font + "|" + ti.size, "*");
                 } else {
-                    alert("Please select a TEXT layer first!");
+                    alert("Klik layer TEKS di Photopea dulu!");
                 }
             `;
             window.parent.postMessage(script, "*");
@@ -189,10 +185,8 @@
             document.getElementById('editStyleId').value = "";
             document.getElementById('sName').value = "";
             document.getElementById('sFont').value = "";
-            document.getElementById('sWeight').value = "Regular";
             document.getElementById('sSize').value = 50;
             document.getElementById('sPrefix').value = "";
-            document.getElementById('btnDelStyle').style.display = "none";
             toggleModal('styleModal');
         }
 
@@ -203,10 +197,8 @@
             document.getElementById('editStyleId').value = s.id;
             document.getElementById('sName').value = s.name;
             document.getElementById('sFont').value = s.font;
-            document.getElementById('sWeight').value = s.weight || "Regular";
             document.getElementById('sSize').value = s.size;
             document.getElementById('sPrefix').value = (s.prefixes || []).join(", ");
-            document.getElementById('btnDelStyle').style.display = "block";
             toggleModal('styleModal');
         }
 
@@ -214,7 +206,7 @@
             const id = document.getElementById('editStyleId').value;
             const newStyle = {
                 id: id || Date.now().toString(),
-                name: document.getElementById('sName').value || "Unnamed Style",
+                name: document.getElementById('sName').value || "Unnamed",
                 font: document.getElementById('sFont').value || "Arial",
                 weight: document.getElementById('sWeight').value,
                 size: parseInt(document.getElementById('sSize').value) || 50,
@@ -227,13 +219,6 @@
                 styles.push(newStyle);
                 if(!activeStyleId) activeStyleId = newStyle.id;
             }
-            saveData(); renderStyleGrid(); renderLines(); toggleModal('styleModal');
-        }
-
-        function deleteStyle() {
-            const id = document.getElementById('editStyleId').value;
-            styles = styles.filter(x => x.id != id);
-            if(activeStyleId == id) activeStyleId = styles[0]?.id || null;
             saveData(); renderStyleGrid(); renderLines(); toggleModal('styleModal');
         }
 
@@ -271,8 +256,7 @@
         function sendText() {
             if(selectedIndex === -1 || !filteredLines[selectedIndex]) return;
             const scale = (parseFloat(document.getElementById('scaleInput').value) || 100) / 100;
-            const style = styles.find(s => s.id == activeStyleId) || { font: "Arial", size: 50, prefixes: [], weight: "Regular" };
-            
+            const style = styles.find(s => s.id == activeStyleId) || { font: "Arial", size: 50, weight: "Regular" };
             let raw = filteredLines[selectedIndex].trim();
             let prefix = (style.prefixes || []).find(p => raw.startsWith(p)) || "";
             let text = raw.replace(prefix, "").trim();
@@ -289,15 +273,12 @@
                 layer.kind = LayerKind.TEXT;
                 var ti = layer.textItem;
                 ti.contents = "${s.trim().replace(/"/g, '\\"')}";
-                
                 try { ti.font = "${style.font}"; } catch(e) {}
                 ti.size = ${style.size * scale};
                 ti.justification = Justification.CENTER;
-
-                var weight = "${style.weight}";
-                if(weight.indexOf("Bold") != -1) { try { ti.fauxBold = true; } catch(e) {} }
-                if(weight.indexOf("Italic") != -1) { try { ti.fauxItalic = true; } catch(e) {} }
-
+                var w = "${style.weight}";
+                if(w.indexOf("Bold") != -1) { try { ti.fauxBold = true; } catch(e) {} }
+                if(w.indexOf("Italic") != -1) { try { ti.fauxItalic = true; } catch(e) {} }
                 if (sel) { ti.position = [(sel[0] + sel[2]) / 2, (sel[1] + sel[3]) / 2]; }
                 else { ti.position = [doc.width / 2, doc.height / 2]; }
             `;
@@ -305,40 +286,10 @@
             setTimeout(() => selectRow(selectedIndex + 1), 50); 
         }
 
-        function exportJSON() {
-            const data = { styles, ignoreLinePrefixes: document.getElementById('ignoreTags').value.split('\n') };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob); a.download = 'typer_v3.8.json'; a.click();
-        }
-
-        function importJSON(e) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    if (data.styles) {
-                        styles = data.styles.map(s => ({
-                            id: s.id || Math.random().toString(),
-                            name: s.name,
-                            font: s.font || s.textProps?.layerText?.textStyleRange[0]?.textStyle?.fontName || "Arial",
-                            weight: s.weight || "Regular",
-                            size: s.size || s.textProps?.layerText?.textStyleRange[0]?.textStyle?.size || 50,
-                            prefixes: s.prefixes || []
-                        }));
-                    }
-                    if (data.ignoreLinePrefixes) document.getElementById('ignoreTags').value = data.ignoreLinePrefixes.join("\n");
-                    saveData(); renderStyleGrid(); renderLines(); alert("Import Success!");
-                } catch(err) { alert("Error importing JSON"); }
-            };
-            reader.readAsText(e.target.files[0]);
-        }
-
         window.onload = () => {
             styles = JSON.parse(localStorage.getItem('typer_styles')) || [];
             activeStyleId = localStorage.getItem('typer_active_style');
-            let savedTags = localStorage.getItem('ignoreTags');
-            document.getElementById('ignoreTags').value = (savedTags === null) ? DEFAULT_TAGS : savedTags;
+            document.getElementById('ignoreTags').value = localStorage.getItem('ignoreTags') || DEFAULT_TAGS;
             document.getElementById('input').value = localStorage.getItem('typer_main_text') || "";
             document.getElementById('scaleInput').value = localStorage.getItem('typer_scale') || "100";
             renderStyleGrid(); renderLines();
