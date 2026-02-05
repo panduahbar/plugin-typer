@@ -89,10 +89,11 @@
 
             <label>Base Size (px)</label>
             <input type="number" id="sSize" class="modal-input">
-            <label>Prefixes (Pisahkan dengan koma)</label>
+            <label>Prefixes (comma separated)</label>
             <input type="text" id="sPrefix" class="modal-input" placeholder='"": , ():'>
             
             <button style="background:var(--accent); color:white; border:none; padding:10px; width:100%; cursor:pointer; font-weight:bold;" onclick="saveStyle()">Save Style</button>
+            <button style="background:#f44; color:white; border:none; padding:10px; width:100%; cursor:pointer; font-weight:bold; margin-top:5px;" id="btnDelStyle" onclick="deleteStyle()">Delete Style</button>
         </div>
     </div>
 
@@ -113,32 +114,37 @@
             <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
             <label style="font-size:10px; color:#aaa; font-weight:bold;">Tags to Ignore</label>
             <textarea id="ignoreTags" class="modal-input" style="height:100px;" oninput="saveSettings()"></textarea>
+            <button onclick="if(confirm('Reset semua data?')){localStorage.clear(); location.reload();}" style="background:#f44; color:white; border:none; padding:5px; width:100%; cursor:pointer; font-size:9px; margin-top:10px;">RESET ALL DATA</button>
         </div>
     </div>
 
     <div class="footer">
-        typer for photopea ( v3.9 ) | Light Footer
+        typer for photopea | v4.0 | Final Communication Fix | Light Footer
     </div>
 
     <script>
         let selectedIndex = -1, activeStyleId = null, filteredLines = [], styles = [];
         const DEFAULT_TAGS = "SFX:\nSfx:\nsfx:\nSFX\nSfx\nsfx\n##\nHalaman\nPage\n---\npage\n===\nP1\nP2\n[1]\nPg.\nPAGE\n=0\n--";
 
-        // Listen for Photopea response
-        window.onmessage = function(e) {
-            if (e.data && typeof e.data === "string" && e.data.startsWith("LAYER_STYLE|")) {
-                const parts = e.data.split("|");
-                document.getElementById('sFont').value = parts[1];
-                document.getElementById('sSize').value = Math.round(parseFloat(parts[2]));
+        // Listen for Photopea response (New Method)
+        window.addEventListener("message", function(e) {
+            if (e.data && typeof e.data === "string" && e.data.startsWith("LAYER_DATA:")) {
+                const rawData = e.data.replace("LAYER_DATA:", "");
+                const json = JSON.parse(rawData);
+                document.getElementById('sFont').value = json.font;
+                document.getElementById('sSize').value = Math.round(json.size);
             }
-        };
+        });
 
         function askPhotopeaForStyle() {
+            // Skrip Photopea yang mengirim data keSharedWindow (Plugin)
             const script = `
-                var ly = app.activeDocument.activeLayer;
+                var doc = app.activeDocument;
+                var ly = doc.activeLayer;
                 if(ly && ly.kind == LayerKind.TEXT) {
                     var ti = ly.textItem;
-                    window.parent.postMessage("LAYER_STYLE|" + ti.font + "|" + ti.size, "*");
+                    var data = { font: ti.font, size: ti.size };
+                    app.echoToSharedWindow("LAYER_DATA:" + JSON.stringify(data));
                 } else {
                     alert("Klik layer TEKS di Photopea dulu!");
                 }
@@ -187,6 +193,7 @@
             document.getElementById('sFont').value = "";
             document.getElementById('sSize').value = 50;
             document.getElementById('sPrefix').value = "";
+            document.getElementById('btnDelStyle').style.display = "none";
             toggleModal('styleModal');
         }
 
@@ -197,8 +204,10 @@
             document.getElementById('editStyleId').value = s.id;
             document.getElementById('sName').value = s.name;
             document.getElementById('sFont').value = s.font;
+            document.getElementById('sWeight').value = s.weight || "Regular";
             document.getElementById('sSize').value = s.size;
             document.getElementById('sPrefix').value = (s.prefixes || []).join(", ");
+            document.getElementById('btnDelStyle').style.display = "block";
             toggleModal('styleModal');
         }
 
@@ -219,6 +228,13 @@
                 styles.push(newStyle);
                 if(!activeStyleId) activeStyleId = newStyle.id;
             }
+            saveData(); renderStyleGrid(); renderLines(); toggleModal('styleModal');
+        }
+
+        function deleteStyle() {
+            const id = document.getElementById('editStyleId').value;
+            styles = styles.filter(x => x.id != id);
+            if(activeStyleId == id) activeStyleId = styles[0]?.id || null;
             saveData(); renderStyleGrid(); renderLines(); toggleModal('styleModal');
         }
 
@@ -284,6 +300,35 @@
             `;
             window.parent.postMessage(ppea, "*");
             setTimeout(() => selectRow(selectedIndex + 1), 50); 
+        }
+
+        function exportJSON() {
+            const data = { styles, ignoreLinePrefixes: document.getElementById('ignoreTags').value.split('\n') };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob); a.download = 'typer_styles.json'; a.click();
+        }
+
+        function importJSON(e) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.styles) {
+                        styles = data.styles.map(s => ({
+                            id: s.id || Math.random().toString(),
+                            name: s.name,
+                            font: s.font || s.textProps?.layerText?.textStyleRange[0]?.textStyle?.fontName || "Arial",
+                            weight: s.weight || "Regular",
+                            size: s.size || s.textProps?.layerText?.textStyleRange[0]?.textStyle?.size || 50,
+                            prefixes: s.prefixes || []
+                        }));
+                    }
+                    if (data.ignoreLinePrefixes) document.getElementById('ignoreTags').value = data.ignoreLinePrefixes.join("\n");
+                    saveData(); renderStyleGrid(); renderLines(); alert("Import Success!");
+                } catch(err) { alert("Error importing JSON"); }
+            };
+            reader.readAsText(e.target.files[0]);
         }
 
         window.onload = () => {
