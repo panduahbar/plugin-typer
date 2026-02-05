@@ -70,15 +70,15 @@
             <label>Style Name</label>
             <input type="text" id="sName" class="modal-input">
             
-            <label>Font Family (Case-Insensitive)</label>
+            <label>Font Family (Nama Font di Photopea)</label>
             <input type="text" id="sFont" class="modal-input" placeholder="e.g. 2Dumb">
             
-            <label>Font Weight / Style</label>
+            <label>Style (Forced Bold/Italic)</label>
             <select id="sWeight" class="modal-select">
                 <option value="Regular">Regular</option>
-                <option value="Bold">Bold</option>
-                <option value="Italic">Italic</option>
-                <option value="Bold Italic">Bold Italic</option>
+                <option value="Bold">Force Bold</option>
+                <option value="Italic">Force Italic</option>
+                <option value="Bold Italic">Force Bold Italic</option>
             </select>
 
             <label>Base Size (px)</label>
@@ -97,9 +97,8 @@
                 <button onclick="toggleModal('settingsModal')" style="color:#f44; border:none; background:none; cursor:pointer; font-weight:bold;">✕</button>
             </div>
             <label style="font-size:10px; color:#aaa; font-weight:bold;">Shortcut Info</label>
-            <div style="background:#222; padding:8px; margin:5px 0 15px; border:1px solid #444; display:flex; justify-content:space-between;">
+            <div style="background:#222; padding:8px; margin:5px 0 15px; border:1px solid #444;">
                 <span>WIN + CTRL <small style="color:#ffca28; margin-left:5px;">(click line first)</small></span>
-                <span style="color:#f44;">✕</span>
             </div>
             <div style="display:flex; gap:5px; margin-bottom:15px;">
                 <button onclick="exportJSON()" style="flex:1; padding:8px; background:#444; color:white; border:none; cursor:pointer;">Export JSON</button>
@@ -113,8 +112,7 @@
     </div>
 
     <div class="footer">
-        typer for photopea ( inspired by <a href="https://typer.hayasaku.fr" target="_blank">typer.hayasaku.fr</a> )
-        <div style="font-size:9px; color:#888; margin-top:2px;">v3.5 | Case-Insensitive Font | Bold & Italic Support</div>
+        typer for photopea | v3.6 | Fast Font Load & Faux Style Support
     </div>
 
     <script>
@@ -264,25 +262,18 @@
                 var ti = layer.textItem;
                 ti.contents = "${s.trim().replace(/"/g, '\\"')}";
                 
-                // Case-Insensitive Logic & Style Support
-                var targetFont = "${style.font}".toLowerCase();
-                var weight = "${style.weight}";
-                var found = false;
-                
-                for(var i=0; i<app.fonts.length; i++){
-                    var f = app.fonts[i];
-                    if(f.postScriptName.toLowerCase() == targetFont || f.name.toLowerCase() == targetFont){
-                        ti.font = f.postScriptName;
-                        found = true; break;
-                    }
-                }
+                // Cepat set font tanpa scanning lambat
+                try {
+                    ti.font = "${style.font}";
+                } catch(e) {}
                 
                 ti.size = ${style.size * scale};
                 ti.justification = Justification.CENTER;
 
-                // Apply Bold/Italic if Regular font is not available
-                if(weight.indexOf("Bold") != -1) { try { layer.bold = true; } catch(e) {} }
-                if(weight.indexOf("Italic") != -1) { try { layer.italic = true; } catch(e) {} }
+                // Forced Bold/Italic (Faux) jika font asli tidak ada variannya
+                var weight = "${style.weight}";
+                if(weight.indexOf("Bold") != -1) { try { ti.fauxBold = true; } catch(e) {} }
+                if(weight.indexOf("Italic") != -1) { try { ti.fauxItalic = true; } catch(e) {} }
 
                 if (sel) { ti.position = [(sel[0] + sel[2]) / 2, (sel[1] + sel[3]) / 2]; }
                 else { ti.position = [doc.width / 2, doc.height / 2]; }
@@ -295,7 +286,7 @@
             const data = { styles, ignoreTags: document.getElementById('ignoreTags').value };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob); a.download = 'typer_v3.5.json'; a.click();
+            a.href = URL.createObjectURL(blob); a.download = 'typer_v3.6.json'; a.click();
         }
 
         function importJSON(e) {
