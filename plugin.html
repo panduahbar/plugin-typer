@@ -70,7 +70,7 @@
             <label>Style Name</label>
             <input type="text" id="sName" class="modal-input">
             
-            <label>Font Family (Pilih atau Tulis Manual)</label>
+            <label>Font Family</label>
             <input list="fontOptions" id="sFont" class="modal-input" placeholder="Ketik atau pilih font...">
             <datalist id="fontOptions">
                 <option value="CCScoundrel-Regular">CC Scoundrel</option>
@@ -81,9 +81,7 @@
                 <option value="RopaSans-Regular">Ropa Sans</option>
                 <option value="CCAskForMercy-Regular">CC Ask For Mercy</option>
                 <option value="BeelzebrushBB">Beelzebrush BB</option>
-                <option value="CCVictorySpeech-Regular">CC Victory Speech</option>
-                <option value="AnimeAce2.0BB-Regular">Anime Ace 2.0</option>
-            </datalist>
+            </select>
             
             <label>Appearance Style</label>
             <select id="sWeight" class="modal-select">
@@ -93,9 +91,15 @@
                 <option value="Bold Italic">Forced Bold Italic</option>
             </select>
 
+            <label>Case Transform (All Caps)</label>
+            <select id="sCase" class="modal-select">
+                <option value="none">Normal (As typed)</option>
+                <option value="uppercase">ALL CAPS</option>
+            </select>
+
             <label>Base Size (px)</label>
             <input type="number" id="sSize" class="modal-input">
-            <label>Prefixes (comma separated)</label>
+            <label>Prefixes (Pisahkan dengan koma)</label>
             <input type="text" id="sPrefix" class="modal-input" placeholder='"": , ():'>
             
             <button style="background:var(--accent); color:white; border:none; padding:10px; width:100%; cursor:pointer; font-weight:bold;" onclick="saveStyle()">Save Style</button>
@@ -109,7 +113,6 @@
                 <strong>Settings</strong>
                 <button onclick="toggleModal('settingsModal')" style="color:#f44; border:none; background:none; cursor:pointer; font-weight:bold;">✕</button>
             </div>
-            <label style="font-size:10px; color:#aaa; font-weight:bold;">Shortcut Info</label>
             <div style="background:#222; padding:8px; margin:5px 0 15px; border:1px solid #444;">
                 <span>WIN + CTRL <small style="color:#ffca28; margin-left:5px;">(click line first)</small></span>
             </div>
@@ -118,7 +121,7 @@
                 <button onclick="document.getElementById('importFile').click()" style="flex:1; padding:8px; background:#444; color:white; border:none; cursor:pointer;">Import JSON</button>
             </div>
             <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
-            <label style="font-size:10px; color:#aaa; font-weight:bold;">Tags for ignoring the lines</label>
+            <label style="font-size:10px; color:#aaa; font-weight:bold;">Tags to Ignore</label>
             <textarea id="ignoreTags" class="modal-input" style="height:100px;" oninput="saveSettings()"></textarea>
             <button onclick="if(confirm('Reset semua data?')){localStorage.clear(); location.reload();}" style="background:#f44; color:white; border:none; padding:5px; width:100%; cursor:pointer; font-size:9px; margin-top:10px;">RESET ALL DATA</button>
         </div>
@@ -126,7 +129,7 @@
 
     <div class="footer">
         typer for photopea ( inspired by <a href="https://typer.hayasaku.fr" target="_blank">typer.hayasaku.fr</a> )
-        <div style="font-size:9px; color:#888; margin-top:2px;">v4.5 | Combobox Font System | Light Footer</div>
+        <div style="font-size:9px; color:#888; margin-top:2px;">v4.6 | All Caps Support | Light Footer</div>
     </div>
 
     <script>
@@ -172,6 +175,8 @@
             document.getElementById('editStyleId').value = "";
             document.getElementById('sName').value = "";
             document.getElementById('sFont').value = "";
+            document.getElementById('sWeight').value = "Regular";
+            document.getElementById('sCase').value = "none";
             document.getElementById('sSize').value = 50;
             document.getElementById('sPrefix').value = "";
             document.getElementById('btnDelStyle').style.display = "none";
@@ -186,6 +191,7 @@
             document.getElementById('sName').value = s.name;
             document.getElementById('sFont').value = s.font;
             document.getElementById('sWeight').value = s.weight || "Regular";
+            document.getElementById('sCase').value = s.case || "none";
             document.getElementById('sSize').value = s.size;
             document.getElementById('sPrefix').value = (s.prefixes || []).join(", ");
             document.getElementById('btnDelStyle').style.display = "block";
@@ -197,8 +203,9 @@
             const newStyle = {
                 id: id || Date.now().toString(),
                 name: document.getElementById('sName').value || "Unnamed",
-                font: document.getElementById('sFont').value,
+                font: document.getElementById('sFont').value || "Arial",
                 weight: document.getElementById('sWeight').value,
+                case: document.getElementById('sCase').value,
                 size: parseInt(document.getElementById('sSize').value) || 50,
                 prefixes: document.getElementById('sPrefix').value.split(",").map(x => x.trim()).filter(x => x !== "")
             };
@@ -253,10 +260,13 @@
         function sendText() {
             if(selectedIndex === -1 || !filteredLines[selectedIndex]) return;
             const scale = (parseFloat(document.getElementById('scaleInput').value) || 100) / 100;
-            const style = styles.find(s => s.id == activeStyleId) || { font: "Arial", size: 50, weight: "Regular" };
+            const style = styles.find(s => s.id == activeStyleId) || { font: "Arial", size: 50, weight: "Regular", case: "none" };
             let raw = filteredLines[selectedIndex].trim();
             let prefix = (style.prefixes || []).find(p => raw.startsWith(p)) || "";
             let text = raw.replace(prefix, "").trim();
+
+            // Handle All Caps
+            if (style.case === "uppercase") text = text.toUpperCase();
 
             let w = text.split(' '), s = "";
             for (let i = 0; i < w.length; i++) {
@@ -301,6 +311,7 @@
                             name: s.name,
                             font: s.font || "Arial",
                             weight: s.weight || "Regular",
+                            case: s.case || "none",
                             size: s.size || 50,
                             prefixes: s.prefixes || []
                         }));
