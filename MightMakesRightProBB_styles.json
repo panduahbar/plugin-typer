@@ -1,0 +1,133 @@
+{
+  "styles": [
+    {
+      "id": "1770271761762",
+      "name": "Normal",
+      "font": "MightMakesRightProBB-Regular",
+      "weight": "Regular",
+      "case": "none",
+      "size": 30,
+      "prefixes": [
+        "\"\":",
+        "“”:",
+        "“”",
+        "=",
+        "\"\""
+      ]
+    },
+    {
+      "id": "1770358149310",
+      "name": "Berpikir",
+      "font": "MightMakesRightProBB-Italic",
+      "weight": "Italic",
+      "case": "none",
+      "size": 30,
+      "prefixes": [
+        "():",
+        "()"
+      ]
+    },
+    {
+      "id": "1770358675406",
+      "name": "Teriak",
+      "font": "CCShoutOutW00-Regular",
+      "weight": "Regular",
+      "case": "none",
+      "size": 30,
+      "prefixes": [
+        ":::",
+        "::",
+        "S:"
+      ]
+    },
+    {
+      "id": "1770358742213",
+      "name": "BOX",
+      "font": "CCTallTales-Regular",
+      "weight": "Regular",
+      "case": "uppercase",
+      "size": 30,
+      "prefixes": [
+        "[]:",
+        "[]"
+      ]
+    },
+    {
+      "id": "1770358800603",
+      "name": "Side Text",
+      "font": "CCScoundrel-Regular",
+      "weight": "Regular",
+      "case": "none",
+      "size": 30,
+      "prefixes": [
+        "ST:"
+      ]
+    },
+    {
+      "id": "1770358841924",
+      "name": "Stress",
+      "font": "KomikaBoo",
+      "weight": "Regular",
+      "size": 30,
+      "prefixes": []
+    },
+    {
+      "id": "1770358894569",
+      "name": "Cloud Bubble",
+      "font": "Mywriting",
+      "weight": "Regular",
+      "size": 30,
+      "prefixes": []
+    },
+    {
+      "id": "1770358932426",
+      "name": "Marah",
+      "font": "BeelzebrushBB",
+      "weight": "Regular",
+      "size": 30,
+      "prefixes": []
+    },
+    {
+      "id": "1770361267690",
+      "name": "System",
+      "font": "FriendorFoeTallBB",
+      "weight": "Regular",
+      "case": "uppercase",
+      "size": 30,
+      "prefixes": [
+        "<>:",
+        "<>"
+      ]
+    },
+    {
+      "id": "1770361697910",
+      "name": "SFX",
+      "font": "Mango-Regular",
+      "weight": "Regular",
+      "case": "none",
+      "size": 30,
+      "prefixes": []
+    }
+  ],
+  "ignoreLinePrefixes": [
+    "SFX:",
+    "Sfx:",
+    "sfx:",
+    "SFX",
+    "Sfx",
+    "sfx",
+    "##",
+    "Halaman",
+    "Page",
+    "---",
+    "page",
+    "===",
+    "P1",
+    "P2",
+    "[1]",
+    "Pg.",
+    "PAGE",
+    "=0",
+    "--"
+  ]
+}
