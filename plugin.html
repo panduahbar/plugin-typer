@@ -100,6 +100,12 @@
                 <option value="uppercase">ALL CAPS</option>
             </select>
 
+            <span class="modal-label">Line Spacing (Leading)</span>
+            <select id="sLeading" class="modal-select">
+                <option value="auto">Auto Leading (Automatic)</option>
+                <option value="none">Normal</option>
+            </select>
+
             <span class="modal-label">Base Size (px)</span>
             <input type="number" id="sSize" class="modal-input" value="50">
 
@@ -136,8 +142,7 @@
 
     <div class="footer">
         typer for photopea ( inspired by <a href="https://typer.hayasaku.fr" target="_blank">typer.hayasaku.fr</a> )
-        <div style="font-size:9px; color:#888; margin-top:2px;">Example style, download here: <a href="https://github.com/shadow-id-pixel/plugin-typer" target="_blank">click here to download JSON Styles</a></div>
-        <div style="font-size:9px; color:#888; margin-top:2px;">v4.7 | Style UI Fixed | All Caps Support</div>
+        <div style="font-size:9px; color:#888; margin-top:2px;">Example style, download here: <a href="https://github.com/shadow-id-pixel/plugin-typer" target="_blank">github.com/shadow-id-pixel/plugin-typer</a></div>
     </div>
 
     <script>
@@ -186,6 +191,7 @@
             document.getElementById('sFont').value = "";
             document.getElementById('sWeight').value = "Regular";
             document.getElementById('sCase').value = "none";
+            document.getElementById('sLeading').value = "auto";
             document.getElementById('sSize').value = 50;
             document.getElementById('sPrefix').value = "";
             document.getElementById('btnDelStyle').style.display = "none";
@@ -201,6 +207,7 @@
             document.getElementById('sFont').value = s.font;
             document.getElementById('sWeight').value = s.weight || "Regular";
             document.getElementById('sCase').value = s.case || "none";
+            document.getElementById('sLeading').value = s.leading || "auto";
             document.getElementById('sSize').value = s.size;
             document.getElementById('sPrefix').value = (s.prefixes || []).join(", ");
             document.getElementById('btnDelStyle').style.display = "block";
@@ -215,6 +222,7 @@
                 font: document.getElementById('sFont').value || "Arial",
                 weight: document.getElementById('sWeight').value,
                 case: document.getElementById('sCase').value,
+                leading: document.getElementById('sLeading').value,
                 size: parseInt(document.getElementById('sSize').value) || 50,
                 prefixes: document.getElementById('sPrefix').value.split(",").map(x => x.trim()).filter(x => x !== "")
             };
@@ -269,7 +277,7 @@
         function sendText() {
             if(selectedIndex === -1 || !filteredLines[selectedIndex]) return;
             const scale = (parseFloat(document.getElementById('scaleInput').value) || 100) / 100;
-            const style = styles.find(s => s.id == activeStyleId) || { font: "Arial", size: 50, weight: "Regular", case: "none" };
+            const style = styles.find(s => s.id == activeStyleId) || { font: "Arial", size: 50, weight: "Regular", case: "none", leading: "auto" };
             let raw = filteredLines[selectedIndex].trim();
             let prefix = (style.prefixes || []).find(p => raw.startsWith(p)) || "";
             let text = raw.replace(prefix, "").trim();
@@ -291,6 +299,12 @@
                 try { ti.font = "${style.font}"; } catch(e) {}
                 ti.size = ${style.size * scale};
                 ti.justification = Justification.CENTER;
+
+                // Auto Leading Support
+                if("${style.leading}" === "auto") {
+                    try { ti.useAutoLeading = true; } catch(e) {}
+                }
+
                 var wStyle = "${style.weight}";
                 if(wStyle.indexOf("Bold") != -1) { try { ti.fauxBold = true; } catch(e) {} }
                 if(wStyle.indexOf("Italic") != -1) { try { ti.fauxItalic = true; } catch(e) {} }
@@ -320,6 +334,7 @@
                             font: s.font || "Arial",
                             weight: s.weight || "Regular",
                             case: s.case || "none",
+                            leading: s.leading || "auto",
                             size: s.size || 50,
                             prefixes: s.prefixes || []
                         }));
@@ -342,5 +357,3 @@
     </script>
 </body>
 </html>
-
-
