@@ -6,6 +6,7 @@
       "font": "CCVictorySpeech-Regular",
       "weight": "Regular",
       "case": "none",
+      "leading": 120,
       "size": 30,
       "prefixes": [
         "\"\":",
@@ -21,6 +22,7 @@
       "font": "CCVictorySpeech-Italic",
       "weight": "Regular",
       "case": "none",
+      "leading": 120,
       "size": 30,
       "prefixes": [
         "():",
@@ -33,6 +35,7 @@
       "font": "CCShoutOutW00-Regular",
       "weight": "Regular",
       "case": "none",
+      "leading": 120,
       "size": 30,
       "prefixes": [
         ":::",
@@ -46,6 +49,7 @@
       "font": "SSRosehip-Regular",
       "weight": "Regular",
       "case": "uppercase",
+      "leading": 120,
       "size": 30,
       "prefixes": [
         "[]:",
@@ -58,6 +62,7 @@
       "font": "CDXAmraam-Regular",
       "weight": "Regular",
       "case": "none",
+      "leading": 120,
       "size": 30,
       "prefixes": [
         "ST:"
@@ -69,6 +74,7 @@
       "font": "KomikaBoo",
       "weight": "Regular",
       "case": "none",
+      "leading": 120,
       "size": 30,
       "prefixes": []
     },
@@ -78,6 +84,7 @@
       "font": "HeartWarming",
       "weight": "Regular",
       "case": "uppercase",
+      "leading": 120,
       "size": 30,
       "prefixes": []
     },
@@ -87,6 +94,7 @@
       "font": "BeelzebrushBB",
       "weight": "Regular",
       "case": "none",
+      "leading": 120,
       "size": 30,
       "prefixes": []
     },
@@ -96,6 +104,7 @@
       "font": "FriendorFoeTallBB",
       "weight": "Regular",
       "case": "uppercase",
+      "leading": 120,
       "size": 30,
       "prefixes": [
         "<>:",
@@ -108,6 +117,7 @@
       "font": "Mango-Regular",
       "weight": "Regular",
       "case": "none",
+      "leading": 120,
       "size": 30,
       "prefixes": []
     },
@@ -117,8 +127,12 @@
       "font": "DomDiagonalBT-Regular",
       "weight": "Regular",
       "case": "uppercase",
+      "leading": 120,
       "size": 30,
-      "prefixes": []
+      "prefixes": [
+        "OT:",
+        "OT"
+      ]
     }
   ],
   "ignoreLinePrefixes": [
