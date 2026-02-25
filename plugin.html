@@ -101,8 +101,8 @@
             </select>
 
             <span class="modal-label">Leading / Line Spacing (%)</span>
-            <input type="number" id="sLeading" class="modal-input" placeholder="e.g., 100" value="100">
-            <div style="font-size:9px; color:#aaa; margin-top:-8px;">Standard is 100%. Lower values (e.g., 85%) make lines closer.</div>
+            <input type="number" id="sLeading" class="modal-input" placeholder="Photoshop standard: 120" value="120">
+            <div style="font-size:9px; color:#aaa; margin-top:-8px;">Photoshop Auto: 120%. Lower values (e.g., 85%) reduce spacing.</div>
 
             <span class="modal-label">Base Size (px)</span>
             <input type="number" id="sSize" class="modal-input" value="50">
@@ -139,7 +139,7 @@
     </div>
 
     <div class="footer">
-        typer for photopea | v4.9 | inspired by <a href="https://typer.hayasaku.fr" target="_blank">typer.hayasaku.fr</a>
+        typer for photopea | v5.0 | inspired by <a href="https://typer.hayasaku.fr" target="_blank">typer.hayasaku.fr</a>
         <div style="font-size:9px; color:#888; margin-top:2px;">Example style, download here: <a href="https://github.com/panduahbar/plugin-typer" target="_blank">github.com/panduahbar/plugin-typer</a></div>
     </div>
 
@@ -189,7 +189,7 @@
             document.getElementById('sFont').value = "";
             document.getElementById('sWeight').value = "Regular";
             document.getElementById('sCase').value = "none";
-            document.getElementById('sLeading').value = 100;
+            document.getElementById('sLeading').value = 120;
             document.getElementById('sSize').value = 50;
             document.getElementById('sPrefix').value = "";
             document.getElementById('btnDelStyle').style.display = "none";
@@ -205,7 +205,7 @@
             document.getElementById('sFont').value = s.font;
             document.getElementById('sWeight').value = s.weight || "Regular";
             document.getElementById('sCase').value = s.case || "none";
-            document.getElementById('sLeading').value = s.leading || 100;
+            document.getElementById('sLeading').value = s.leading || 120;
             document.getElementById('sSize').value = s.size;
             document.getElementById('sPrefix').value = (s.prefixes || []).join(", ");
             document.getElementById('btnDelStyle').style.display = "block";
@@ -220,7 +220,7 @@
                 font: document.getElementById('sFont').value || "Arial",
                 weight: document.getElementById('sWeight').value,
                 case: document.getElementById('sCase').value,
-                leading: parseFloat(document.getElementById('sLeading').value) || 100,
+                leading: parseFloat(document.getElementById('sLeading').value) || 120,
                 size: parseInt(document.getElementById('sSize').value) || 50,
                 prefixes: document.getElementById('sPrefix').value.split(",").map(x => x.trim()).filter(x => x !== "")
             };
@@ -275,7 +275,7 @@
         function sendText() {
             if(selectedIndex === -1 || !filteredLines[selectedIndex]) return;
             const scale = (parseFloat(document.getElementById('scaleInput').value) || 100) / 100;
-            const style = styles.find(s => s.id == activeStyleId) || { font: "Arial", size: 50, weight: "Regular", case: "none", leading: 100 };
+            const style = styles.find(s => s.id == activeStyleId) || { font: "Arial", size: 50, weight: "Regular", case: "none", leading: 120 };
             let raw = filteredLines[selectedIndex].trim();
             let prefix = (style.prefixes || []).find(p => raw.startsWith(p)) || "";
             let text = raw.replace(prefix, "").trim();
@@ -298,7 +298,7 @@
                 ti.size = ${style.size * scale};
                 ti.justification = Justification.CENTER;
 
-                // Manual Leading Support (Convert % to Photopea value)
+                // Leading percentage support (Photoshop Auto Leading is 120%)
                 try { ti.leading = ${style.size * (style.leading / 100) * scale}; } catch(e) {}
 
                 var wStyle = "${style.weight}";
@@ -330,7 +330,7 @@
                             font: s.font || "Arial",
                             weight: s.weight || "Regular",
                             case: s.case || "none",
-                            leading: s.leading || 100,
+                            leading: s.leading || 120,
                             size: s.size || 50,
                             prefixes: s.prefixes || []
                         }));
